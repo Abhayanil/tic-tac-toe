@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 min-h-screen;
+  }
+}
+
+@layer components {
+  .game-container {
+    @apply min-h-screen flex flex-col items-center justify-center p-4;
+  }
+  
+  .game-title {
+    @apply text-4xl md:text-6xl font-bold text-gray-800 dark:text-white mb-8 text-center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .game-board {
+    @apply grid grid-cols-3 gap-2 p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl;
+    @apply border border-gray-200 dark:border-gray-700;
+  }
+  
+  .game-square {
+    @apply w-20 h-20 md:w-24 md:h-24 bg-gray-50 dark:bg-gray-700 rounded-lg;
+    @apply border-2 border-gray-200 dark:border-gray-600;
+    @apply flex items-center justify-center cursor-pointer;
+    @apply hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors;
+    @apply text-3xl md:text-4xl font-bold;
+  }
+  
+  .game-square:hover {
+    @apply transform scale-105 shadow-lg;
+  }
+  
+  .game-square.disabled {
+    @apply cursor-not-allowed opacity-75;
+  }
+  
+  .game-square.winning {
+    @apply bg-green-100 dark:bg-green-900 border-green-400 dark:border-green-500;
+  }
+  
+  .player-x {
+    @apply text-blue-600 dark:text-blue-400;
+  }
+  
+  .player-o {
+    @apply text-red-600 dark:text-red-400;
+  }
+  
+  .status-bar {
+    @apply text-center mb-6 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg;
+    @apply border border-gray-200 dark:border-gray-700;
+  }
+  
+  .status-text {
+    @apply text-xl md:text-2xl font-semibold text-gray-800 dark:text-white mb-2;
+  }
+  
+  .turn-indicator {
+    @apply text-lg text-gray-600 dark:text-gray-300;
+  }
+  
+  .reset-button {
+    @apply mt-6 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500;
+    @apply text-white font-semibold rounded-lg shadow-lg;
+    @apply hover:from-purple-600 hover:to-pink-600 transition-all duration-200;
+    @apply transform hover:scale-105 active:scale-95;
+  }
+  
+  .theme-toggle {
+    @apply fixed top-4 right-4 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg;
+    @apply border border-gray-200 dark:border-gray-700;
+    @apply hover:scale-110 transition-transform cursor-pointer;
+  }
+  
+  .score-board {
+    @apply flex gap-4 mb-6;
+  }
+  
+  .score-item {
+    @apply bg-white dark:bg-gray-800 px-4 py-2 rounded-lg shadow;
+    @apply border border-gray-200 dark:border-gray-700;
+    @apply text-center min-w-[80px];
+  }
+  
+  .score-label {
+    @apply text-sm text-gray-600 dark:text-gray-400 font-medium;
+  }
+  
+  .score-value {
+    @apply text-2xl font-bold;
+  }
+}
