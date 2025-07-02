@@ -18,6 +18,8 @@ const App = () => {
   const [playerMoves, setPlayerMoves] = useState({ X: [], O: [] })
   // Track squares that are about to disappear for animation
   const [disappearingSquares, setDisappearingSquares] = useState([])
+  // Track the starting player and alternate after each game
+  const [startingPlayer, setStartingPlayer] = useState('X')
 
   // Check for winner
   const checkWinner = (squares) => {
@@ -41,32 +43,18 @@ const App = () => {
     if (board[index] || winner) return
 
     const currentPlayer = isXNext ? 'X' : 'O'
-    const newBoard = [...board]
-    const newPlayerMoves = { ...playerMoves }
-    
-    // Add the new move to the current player's move list
-    newPlayerMoves[currentPlayer] = [...playerMoves[currentPlayer], index]
-    
-    // If player has more than 3 moves, remove the oldest one
-    let squareToRemove = null
-    if (newPlayerMoves[currentPlayer].length > 3) {
-      squareToRemove = newPlayerMoves[currentPlayer].shift() // Remove first (oldest) move
-      
-      // Add to disappearing squares for animation
-      setDisappearingSquares([squareToRemove])
-      
-      // Clear the oldest square after a brief delay for animation
-      setTimeout(() => {
-        setBoard(prevBoard => {
-          const updatedBoard = [...prevBoard]
-          updatedBoard[squareToRemove] = null
-          return updatedBoard
-        })
-        setDisappearingSquares([])
-      }, 300) // 300ms delay for disappearing animation
+    let newBoard = [...board]
+    let newPlayerMoves = { ...playerMoves }
+
+    // Remove oldest symbol if player already has 3
+    if (newPlayerMoves[currentPlayer].length === 3) {
+      const oldestIndex = newPlayerMoves[currentPlayer][0]
+      newBoard[oldestIndex] = null
+      newPlayerMoves[currentPlayer] = newPlayerMoves[currentPlayer].slice(1)
     }
-    
-    // Place the new move
+
+    // Add the new move to the current player's move list
+    newPlayerMoves[currentPlayer] = [...newPlayerMoves[currentPlayer], index]
     newBoard[index] = currentPlayer
     setBoard(newBoard)
     setPlayerMoves(newPlayerMoves)
@@ -88,12 +76,14 @@ const App = () => {
   // Reset game
   const resetGame = () => {
     setBoard(Array(9).fill(null))
-    setIsXNext(true)
     setWinner(null)
     setWinningLine([])
     setPlayerMoves({ X: [], O: [] })
     setDisappearingSquares([])
     setGameCount(prev => prev + 1)
+    // Alternate starting player
+    setStartingPlayer(prev => (prev === 'X' ? 'O' : 'X'))
+    setIsXNext(startingPlayer === 'X' ? false : true)
   }
 
   // Reset scores
@@ -115,6 +105,11 @@ const App = () => {
       document.documentElement.classList.remove('dark')
     }
   }, [darkMode])
+
+  // Set isXNext to match startingPlayer at the start of each game
+  useEffect(() => {
+    setIsXNext(startingPlayer === 'X')
+  }, [startingPlayer, gameCount])
 
   return (
     <div className="game-container">
