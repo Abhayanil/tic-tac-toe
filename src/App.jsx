@@ -11,10 +11,13 @@ const App = () => {
   const [isXNext, setIsXNext] = useState(true)
   const [winner, setWinner] = useState(null)
   const [winningLine, setWinningLine] = useState([])
-  const [isDraw, setIsDraw] = useState(false)
   const [darkMode, setDarkMode] = useState(false)
-  const [scores, setScores] = useState({ X: 0, O: 0, draws: 0 })
+  const [scores, setScores] = useState({ X: 0, O: 0 })
   const [gameCount, setGameCount] = useState(0)
+  // Track each player's moves in order (arrays of board indices)
+  const [playerMoves, setPlayerMoves] = useState({ X: [], O: [] })
+  // Track squares that are about to disappear for animation
+  const [disappearingSquares, setDisappearingSquares] = useState([])
 
   // Check for winner
   const checkWinner = (squares) => {
@@ -35,12 +38,40 @@ const App = () => {
 
   // Handle square click
   const handleSquareClick = (index) => {
-    if (board[index] || winner || isDraw) return
+    if (board[index] || winner) return
 
+    const currentPlayer = isXNext ? 'X' : 'O'
     const newBoard = [...board]
-    newBoard[index] = isXNext ? 'X' : 'O'
+    const newPlayerMoves = { ...playerMoves }
+    
+    // Add the new move to the current player's move list
+    newPlayerMoves[currentPlayer] = [...playerMoves[currentPlayer], index]
+    
+    // If player has more than 3 moves, remove the oldest one
+    let squareToRemove = null
+    if (newPlayerMoves[currentPlayer].length > 3) {
+      squareToRemove = newPlayerMoves[currentPlayer].shift() // Remove first (oldest) move
+      
+      // Add to disappearing squares for animation
+      setDisappearingSquares([squareToRemove])
+      
+      // Clear the oldest square after a brief delay for animation
+      setTimeout(() => {
+        setBoard(prevBoard => {
+          const updatedBoard = [...prevBoard]
+          updatedBoard[squareToRemove] = null
+          return updatedBoard
+        })
+        setDisappearingSquares([])
+      }, 300) // 300ms delay for disappearing animation
+    }
+    
+    // Place the new move
+    newBoard[index] = currentPlayer
     setBoard(newBoard)
+    setPlayerMoves(newPlayerMoves)
 
+    // Check for winner after the move
     const result = checkWinner(newBoard)
     if (result) {
       setWinner(result.winner)
@@ -48,12 +79,6 @@ const App = () => {
       setScores(prev => ({
         ...prev,
         [result.winner]: prev[result.winner] + 1
-      }))
-    } else if (newBoard.every(square => square !== null)) {
-      setIsDraw(true)
-      setScores(prev => ({
-        ...prev,
-        draws: prev.draws + 1
       }))
     } else {
       setIsXNext(!isXNext)
@@ -66,13 +91,14 @@ const App = () => {
     setIsXNext(true)
     setWinner(null)
     setWinningLine([])
-    setIsDraw(false)
+    setPlayerMoves({ X: [], O: [] })
+    setDisappearingSquares([])
     setGameCount(prev => prev + 1)
   }
 
   // Reset scores
   const resetScores = () => {
-    setScores({ X: 0, O: 0, draws: 0 })
+    setScores({ X: 0, O: 0 })
     setGameCount(0)
   }
 
@@ -117,7 +143,6 @@ const App = () => {
       >
         <StatusBar 
           winner={winner}
-          isDraw={isDraw}
           isXNext={isXNext}
           gameCount={gameCount}
         />
@@ -134,7 +159,7 @@ const App = () => {
           onSquareClick={handleSquareClick}
           winningLine={winningLine}
           winner={winner}
-          isDraw={isDraw}
+          disappearingSquares={disappearingSquares}
         />
       </motion.div>
 

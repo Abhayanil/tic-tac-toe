@@ -1,7 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 
-const Square = ({ value, onClick, isWinning, isDisabled, index }) => {
+const Square = ({ value, onClick, isWinning, isDisabled, isDisappearing, index }) => {
   const squareVariants = {
     hidden: { 
       opacity: 0, 
@@ -48,6 +48,15 @@ const Square = ({ value, onClick, isWinning, isDisabled, index }) => {
         stiffness: 500,
         damping: 15,
         duration: 0.6
+      }
+    },
+    disappearing: {
+      scale: 0,
+      opacity: 0,
+      rotate: 180,
+      transition: {
+        duration: 0.3,
+        ease: "easeInOut"
       }
     }
   }
@@ -116,7 +125,7 @@ const Square = ({ value, onClick, isWinning, isDisabled, index }) => {
         <motion.span
           variants={symbolVariants}
           initial="hidden"
-          animate="visible"
+          animate={isDisappearing ? "disappearing" : "visible"}
           className="select-none font-bold"
           style={{
             textShadow: value === 'X' 

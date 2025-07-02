@@ -81,22 +81,6 @@ const ScoreBoard = ({ scores, onResetScores }) => {
         variants={itemVariants}
         whileHover={{ scale: 1.05 }}
       >
-        <div className="score-label">Draws</div>
-        <motion.div 
-          className="score-value text-yellow-600 dark:text-yellow-400"
-          key={`draws-${scores.draws}`}
-          variants={scoreUpdateVariants}
-          animate={scores.draws > 0 ? "update" : ""}
-        >
-          {scores.draws}
-        </motion.div>
-      </motion.div>
-
-      <motion.div
-        className="score-item"
-        variants={itemVariants}
-        whileHover={{ scale: 1.05 }}
-      >
         <div className="score-label">Player O</div>
         <motion.div 
           className="score-value text-red-600 dark:text-red-400"
@@ -108,7 +92,7 @@ const ScoreBoard = ({ scores, onResetScores }) => {
         </motion.div>
       </motion.div>
 
-      {(scores.X > 0 || scores.O > 0 || scores.draws > 0) && (
+      {(scores.X > 0 || scores.O > 0) && (
         <motion.button
           className="ml-4 px-3 py-1 bg-red-500 text-white text-sm rounded-lg font-medium"
           variants={resetButtonVariants}

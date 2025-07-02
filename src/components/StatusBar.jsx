@@ -1,13 +1,10 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const StatusBar = ({ winner, isDraw, isXNext, gameCount }) => {
+const StatusBar = ({ winner, isXNext, gameCount }) => {
   const getStatusMessage = () => {
     if (winner) {
       return `🎉 Player ${winner} Wins!`
-    }
-    if (isDraw) {
-      return "🤝 It's a Draw!"
     }
     return `Player ${isXNext ? 'X' : 'O'}'s Turn`
   }
@@ -17,9 +14,6 @@ const StatusBar = ({ winner, isDraw, isXNext, gameCount }) => {
       return winner === 'X' 
         ? 'text-blue-600 dark:text-blue-400' 
         : 'text-red-600 dark:text-red-400'
-    }
-    if (isDraw) {
-      return 'text-yellow-600 dark:text-yellow-400'
     }
     return isXNext 
       ? 'text-blue-600 dark:text-blue-400' 
@@ -86,7 +80,7 @@ const StatusBar = ({ winner, isDraw, isXNext, gameCount }) => {
     >
       <AnimatePresence mode="wait">
         <motion.div
-          key={`${winner}-${isDraw}-${isXNext}-${gameCount}`}
+          key={`${winner}-${isXNext}-${gameCount}`}
           variants={statusVariants}
           initial="hidden"
           animate="visible"
@@ -97,7 +91,7 @@ const StatusBar = ({ winner, isDraw, isXNext, gameCount }) => {
         </motion.div>
       </AnimatePresence>
 
-      {!winner && !isDraw && (
+      {!winner && (
         <motion.div
           variants={turnIndicatorVariants}
           initial="hidden"
@@ -107,7 +101,7 @@ const StatusBar = ({ winner, isDraw, isXNext, gameCount }) => {
           <motion.div
             className="flex items-center justify-center gap-2"
             variants={pulseVariants}
-            animate={!winner && !isDraw ? "pulse" : ""}
+            animate={!winner ? "pulse" : ""}
           >
             <span>Current Player:</span>
             <motion.span
@@ -125,7 +119,7 @@ const StatusBar = ({ winner, isDraw, isXNext, gameCount }) => {
         </motion.div>
       )}
 
-      {(winner || isDraw) && (
+      {winner && (
         <motion.div
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
