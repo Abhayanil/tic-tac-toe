@@ -2,7 +2,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import Square from './Square'
 
-const Board = ({ board, onSquareClick, winningLine, winner, disappearingSquares = [] }) => {
+const Board = ({ board, onSquareClick, winningLine, winner, disappearingSquares = [], isDisabled = false }) => {
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.8 },
     visible: {
@@ -40,8 +40,8 @@ const Board = ({ board, onSquareClick, winningLine, winner, disappearingSquares 
           value={value}
           onClick={() => onSquareClick(index)}
           isWinning={winningLine.includes(index)}
-          isDisabled={winner || value !== null}
-          isDisappearing={disappearingSquares.includes(index)}
+          isDisabled={isDisabled || winner || value !== null}
+          isDisappearing={disappearingSquares.includes(index) && !winningLine.includes(index)}
           index={index}
         />
       ))}

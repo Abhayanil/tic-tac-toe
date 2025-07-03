@@ -46,11 +46,19 @@ const App = () => {
     let newBoard = [...board]
     let newPlayerMoves = { ...playerMoves }
 
-    // Remove oldest symbol if player already has 3
+    // Remove oldest symbol if player already has 3 (but not if it would break a winning line)
     if (newPlayerMoves[currentPlayer].length === 3) {
       const oldestIndex = newPlayerMoves[currentPlayer][0]
-      newBoard[oldestIndex] = null
-      newPlayerMoves[currentPlayer] = newPlayerMoves[currentPlayer].slice(1)
+      // Check if removing this symbol would break a current winning line
+      const tempBoard = [...newBoard]
+      tempBoard[oldestIndex] = null
+      const tempResult = checkWinner(tempBoard)
+      
+      // Only remove if it doesn't break a winning line
+      if (!tempResult || tempResult.winner !== currentPlayer) {
+        newBoard[oldestIndex] = null
+        newPlayerMoves[currentPlayer] = newPlayerMoves[currentPlayer].slice(1)
+      }
     }
 
     // Add the new move to the current player's move list

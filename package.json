@@ -4,7 +4,6 @@
   "description": "Interactive Tic Tac Toe game built with React and Framer Motion",
   "type": "module",
   "homepage": "https://github.com/Abhayanil/tic-tac-toe",
-
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -14,9 +13,11 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.50.3",
     "framer-motion": "^10.16.4",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",
