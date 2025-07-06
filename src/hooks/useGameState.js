@@ -286,6 +286,16 @@ export const useGameState = (gameId = null) => {
       )
       .subscribe((status) => {
         console.log('Supabase channel status:', status)
+        
+        // If subscription fails, try to reconnect after a delay
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.log('Channel error, attempting to reconnect...')
+          setTimeout(() => {
+            if (subscriptionRef.current) {
+              subscribeToGame(gameId)
+            }
+          }, 2000)
+        }
       })
 
     subscriptionRef.current = channel
@@ -395,6 +405,16 @@ export const useGameState = (gameId = null) => {
       )
       .subscribe((status) => {
         console.log('Supabase channel status:', status);
+        
+        // If subscription fails, try to reconnect after a delay
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.log('Channel error, attempting to reconnect...')
+          setTimeout(() => {
+            if (subscriptionRef.current) {
+              subscribeToGame(gameId)
+            }
+          }, 2000)
+        }
       });
 
     subscriptionRef.current = channel;

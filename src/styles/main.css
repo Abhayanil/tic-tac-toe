@@ -9,6 +9,14 @@
   
   body {
     @apply bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 min-h-screen;
+    /* Prevent zoom on mobile devices */
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
 }
 
@@ -36,6 +44,12 @@
     @apply flex items-center justify-center cursor-pointer;
     @apply hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors;
     @apply text-3xl md:text-4xl font-bold;
+    /* Mobile-specific improvements */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
   
   .game-square:hover {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 
-const WaitingRoom = ({ gameId, playerName, onBack }) => {
+const WaitingRoom = ({ gameId, playerName, onBack, onRefresh }) => {
   const [copied, setCopied] = useState(false)
 
   const gameUrl = `${window.location.origin}${window.location.pathname}?game=${gameId}`
@@ -74,7 +74,7 @@ const WaitingRoom = ({ gameId, playerName, onBack }) => {
       >
         <motion.div variants={itemVariants}>
           <h1 className="game-title text-center mb-8">
-            Waiting for Player...
+            Waiting for Player
           </h1>
         </motion.div>
 
@@ -82,96 +82,98 @@ const WaitingRoom = ({ gameId, playerName, onBack }) => {
           variants={itemVariants}
           className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 border border-gray-200 dark:border-gray-700"
         >
-          {/* Waiting Animation */}
+          {/* Player Info */}
           <motion.div
-            variants={pulseVariants}
-            animate="pulse"
-            className="flex flex-col items-center mb-6"
+            variants={itemVariants}
+            className="text-center mb-6"
           >
-            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
-              <div className="w-8 h-8 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-            </div>
-            <p className="text-lg font-medium text-gray-700 dark:text-gray-300 text-center">
-              Waiting for another player to join...
+            <motion.div
+              variants={pulseVariants}
+              animate="pulse"
+              className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4"
+            >
+              <span className="text-white text-2xl font-bold">X</span>
+            </motion.div>
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+              {playerName}
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              You're Player X (goes first)
             </p>
           </motion.div>
 
-          {/* Game Info */}
-          <motion.div variants={itemVariants} className="space-y-4">
-            <div className="text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                You are: <span className="font-semibold text-blue-600 dark:text-blue-400">{playerName} (X)</span>
-              </p>
-              <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Game ID</p>
-                <p className="text-2xl font-mono font-bold text-gray-900 dark:text-white tracking-wider">
-                  {gameId}
-                </p>
-              </div>
-            </div>
-
-            {/* Share Options */}
-            <div className="space-y-3">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">
-                Share this game:
-              </p>
-              
-              {/* Game URL */}
-              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Game Link</p>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={gameUrl}
-                    readOnly
-                    className="flex-1 text-xs bg-transparent text-gray-600 dark:text-gray-300 font-mono truncate"
-                  />
-                  <button
-                    onClick={copyToClipboard}
-                    className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-md transition-colors"
-                  >
-                    {copied ? 'Copied!' : 'Copy'}
-                  </button>
-                </div>
-              </div>
-
-              {/* Share Button */}
-              <motion.button
-                onClick={shareGame}
-                className="w-full py-3 px-4 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold rounded-lg shadow-lg transition-all duration-200"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+          {/* Game ID */}
+          <motion.div
+            variants={itemVariants}
+            className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
+          >
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Game ID:
+            </h3>
+            <div className="flex items-center justify-between">
+              <code className="text-lg font-mono font-bold text-gray-900 dark:text-white bg-white dark:bg-gray-800 px-3 py-2 rounded border">
+                {gameId}
+              </code>
+              <button
+                onClick={copyToClipboard}
+                className="ml-2 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors"
               >
-                {navigator.share ? 'Share Game' : 'Copy Link'}
-              </motion.button>
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
             </div>
-
-            {/* Instructions */}
-            <motion.div
-              variants={itemVariants}
-              className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700"
-            >
-              <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">
-                How to invite a friend:
-              </h3>
-              <ul className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
-                <li>• Share the game link or game ID with your friend</li>
-                <li>• They can join by entering the game ID: <span className="font-mono font-bold">{gameId}</span></li>
-                <li>• Once they join, the game will start automatically!</li>
-              </ul>
-            </motion.div>
           </motion.div>
 
-          {/* Back Button */}
-          <motion.button
-            onClick={onBack}
-            className="w-full mt-6 py-2 px-4 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          {/* Action Buttons */}
+          <motion.div
+            variants={itemVariants}
+            className="space-y-3"
           >
-            Back to Start
-          </motion.button>
+            <motion.button
+              onClick={shareGame}
+              className="w-full py-3 px-4 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold rounded-lg shadow-lg transition-all duration-200"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {navigator.share ? 'Share Game' : 'Copy Link'}
+            </motion.button>
+
+            {/* Mobile-specific refresh button */}
+            <motion.button
+              onClick={onRefresh}
+              className="w-full py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-lg transition-all duration-200"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              🔄 Refresh Game Status
+            </motion.button>
+          </motion.div>
+
+          {/* Instructions */}
+          <motion.div
+            variants={itemVariants}
+            className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700"
+          >
+            <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">
+              How to invite a friend:
+            </h3>
+            <ul className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
+              <li>• Share the game link or game ID with your friend</li>
+              <li>• They can join by entering the game ID: <span className="font-mono font-bold">{gameId}</span></li>
+              <li>• Once they join, the game will start automatically!</li>
+              <li>• If you're stuck here, try the refresh button above</li>
+            </ul>
+          </motion.div>
         </motion.div>
+
+        {/* Back Button */}
+        <motion.button
+          onClick={onBack}
+          className="w-full mt-6 py-2 px-4 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          Back to Start
+        </motion.button>
       </motion.div>
     </div>
   )
