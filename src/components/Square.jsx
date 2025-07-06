@@ -5,28 +5,26 @@ const Square = ({ value, onClick, isWinning, isDisabled, isDisappearing, index }
   const squareVariants = {
     hidden: { 
       opacity: 0, 
-      scale: 0.8,
-      rotateY: -90
+      scale: 0.9
     },
     visible: { 
       opacity: 1, 
       scale: 1,
-      rotateY: 0,
       transition: {
-        delay: index * 0.05,
-        duration: 0.4,
+        delay: index * 0.03,
+        duration: 0.3,
         ease: "easeOut"
       }
     },
     hover: {
-      scale: 1.05,
-      boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+      scale: 1.02,
       transition: {
-        duration: 0.2
+        duration: 0.15,
+        ease: "easeOut"
       }
     },
     tap: {
-      scale: 0.95,
+      scale: 0.98,
       transition: {
         duration: 0.1
       }
@@ -36,26 +34,23 @@ const Square = ({ value, onClick, isWinning, isDisabled, isDisappearing, index }
   const symbolVariants = {
     hidden: { 
       scale: 0, 
-      opacity: 0,
-      rotate: -180
+      opacity: 0
     },
     visible: { 
       scale: 1, 
       opacity: 1,
-      rotate: 0,
       transition: {
         type: "spring",
-        stiffness: 500,
-        damping: 15,
-        duration: 0.6
+        stiffness: 300,
+        damping: 20,
+        duration: 0.4
       }
     },
     disappearing: {
       scale: 0,
       opacity: 0,
-      rotate: 180,
       transition: {
-        duration: 0.3,
+        duration: 0.2,
         ease: "easeInOut"
       }
     }
@@ -63,12 +58,12 @@ const Square = ({ value, onClick, isWinning, isDisabled, isDisappearing, index }
 
   const winningVariants = {
     winning: {
-      backgroundColor: ["#f0fdf4", "#bbf7d0", "#f0fdf4"],
-      scale: [1, 1.1, 1],
+      scale: [1, 1.05, 1],
       transition: {
-        duration: 0.8,
+        duration: 1.2,
         repeat: Infinity,
-        repeatType: "reverse"
+        repeatType: "reverse",
+        ease: "easeInOut"
       }
     }
   }
@@ -98,11 +93,21 @@ const Square = ({ value, onClick, isWinning, isDisabled, isDisappearing, index }
     }
   }
 
-  const handleClick = () => {
+  const handleClick = (e) => {
+    // Prevent default to avoid any mobile browser quirks
+    e.preventDefault()
+    e.stopPropagation()
+    
     if (!isDisabled && !value) {
       playClickSound()
       onClick()
     }
+  }
+
+  const handleTouchStart = (e) => {
+    // Prevent default touch behavior that might interfere
+    e.preventDefault()
+    e.stopPropagation()
   }
 
   return (
@@ -119,7 +124,10 @@ const Square = ({ value, onClick, isWinning, isDisabled, isDisappearing, index }
       whileHover={!isDisabled ? "hover" : {}}
       whileTap={!isDisabled ? "tap" : {}}
       onClick={handleClick}
+      onTouchStart={handleTouchStart}
       disabled={isDisabled}
+      // Add touch-action CSS property for better mobile handling
+      style={{ touchAction: 'manipulation' }}
     >
       {value && (
         <motion.span
@@ -137,14 +145,13 @@ const Square = ({ value, onClick, isWinning, isDisabled, isDisappearing, index }
         </motion.span>
       )}
       
-      {/* Hover effect for empty squares */}
+      {/* Subtle hover effect for empty squares */}
       {!value && !isDisabled && (
         <motion.div
-          className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-20 text-gray-400 text-2xl font-bold pointer-events-none"
+          className="absolute inset-0 bg-gray-100 dark:bg-gray-600 rounded-lg opacity-0 pointer-events-none"
           whileHover={{ opacity: 0.3 }}
-        >
-          ?
-        </motion.div>
+          transition={{ duration: 0.15 }}
+        />
       )}
     </motion.button>
   )

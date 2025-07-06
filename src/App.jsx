@@ -90,8 +90,9 @@ const App = () => {
     setDisappearingSquares([])
     setGameCount(prev => prev + 1)
     // Alternate starting player
-    setStartingPlayer(prev => (prev === 'X' ? 'O' : 'X'))
-    setIsXNext(startingPlayer === 'X' ? false : true)
+    const newStartingPlayer = startingPlayer === 'X' ? 'O' : 'X'
+    setStartingPlayer(newStartingPlayer)
+    setIsXNext(newStartingPlayer === 'X')
   }
 
   // Reset scores
@@ -174,7 +175,7 @@ const App = () => {
         <ResetButton onReset={resetGame} />
       </motion.div>
 
-      {/* Confetti animation for winner */}
+      {/* Subtle celebration animation for winner */}
       <AnimatePresence>
         {winner && (
           <motion.div
@@ -183,23 +184,24 @@ const App = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            {[...Array(50)].map((_, i) => (
+            {[...Array(20)].map((_, i) => (
               <motion.div
                 key={i}
-                className="absolute w-2 h-2 bg-yellow-400 rounded-full"
+                className="absolute w-1 h-1 bg-emerald-400 rounded-full"
                 initial={{
-                  x: Math.random() * window.innerWidth,
-                  y: -10,
-                  rotate: 0,
+                  x: window.innerWidth / 2,
+                  y: window.innerHeight / 2,
+                  scale: 0,
                 }}
                 animate={{
-                  y: window.innerHeight + 10,
-                  rotate: 360,
-                  x: Math.random() * window.innerWidth,
+                  x: window.innerWidth / 2 + (Math.random() - 0.5) * 400,
+                  y: window.innerHeight / 2 + (Math.random() - 0.5) * 400,
+                  scale: [0, 1, 0],
+                  opacity: [0, 1, 0],
                 }}
                 transition={{
-                  duration: Math.random() * 2 + 2,
-                  delay: Math.random() * 2,
+                  duration: 1.5,
+                  delay: Math.random() * 0.5,
                   ease: "easeOut",
                 }}
               />

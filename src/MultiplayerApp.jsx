@@ -75,6 +75,20 @@ const MultiplayerApp = () => {
     }
   }, [gameState.status, currentPlayerState]);
 
+  // Mobile-specific: Add a manual refresh mechanism for waiting room
+  useEffect(() => {
+    if (gameFlow === 'waiting' && currentPlayerState === 'X' && gameState.status === 'waiting') {
+      // On mobile, set up a periodic check to refresh game state
+      const interval = setInterval(() => {
+        if (gameIdFromUrl) {
+          loadGame(gameIdFromUrl);
+        }
+      }, 3000); // Check every 3 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [gameFlow, currentPlayerState, gameState.status, gameIdFromUrl, loadGame]);
+
   const handleCreateGame = async (name) => {
     setPlayerName(name)
     const gameId = await createGame(name)
@@ -112,6 +126,12 @@ const MultiplayerApp = () => {
     setPlayerName('')
     // Clear URL
     window.history.pushState({}, '', window.location.pathname)
+  }
+
+  const handleRefresh = () => {
+    if (gameIdFromUrl) {
+      loadGame(gameIdFromUrl)
+    }
   }
 
   const toggleTheme = () => {
@@ -153,6 +173,7 @@ const MultiplayerApp = () => {
         gameId={gameState.gameId}
         playerName={playerName}
         onBack={handleBack}
+        onRefresh={handleRefresh}
       />
     )
   }
