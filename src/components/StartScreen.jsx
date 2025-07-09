@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 
-const StartScreen = ({ onCreateGame, onJoinGame, isLoading, error, initialMode = 'create', initialGameId = '' }) => {
+const StartScreen = ({ onCreateGame, onJoinGame, isLoading, error, initialMode = 'create', initialGameId = '', onBack }) => {
   const [playerName, setPlayerName] = useState('')
   const [gameIdToJoin, setGameIdToJoin] = useState(initialGameId)
   const [mode, setMode] = useState(initialGameId && initialGameId !== 'null' && initialGameId !== '' ? 'join' : initialMode) // 'create' or 'join'
@@ -132,23 +132,35 @@ const StartScreen = ({ onCreateGame, onJoinGame, isLoading, error, initialMode =
               </motion.div>
             )}
 
-            {/* Submit Button */}
-            <motion.button
-              type="submit"
-              disabled={isLoading || !playerName.trim() || (mode === 'join' && !gameIdToJoin.trim())}
-              className="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:scale-100 disabled:cursor-not-allowed"
-              whileHover={{ scale: isLoading ? 1 : 1.02 }}
-              whileTap={{ scale: isLoading ? 1 : 0.98 }}
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  {mode === 'create' ? 'Creating Game...' : 'Joining Game...'}
-                </div>
-              ) : (
-                mode === 'create' ? 'Create Game' : 'Join Game'
+            {/* Buttons */}
+            <div className="flex gap-4 mt-6">
+              {onBack && (
+                <button
+                  type="button"
+                  onClick={onBack}
+                  className="flex-1 py-3 px-4 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors"
+                >
+                  Back
+                </button>
               )}
-            </motion.button>
+              
+              <motion.button
+                type="submit"
+                disabled={isLoading || !playerName.trim() || (mode === 'join' && !gameIdToJoin.trim())}
+                className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:scale-100 disabled:cursor-not-allowed"
+                whileHover={{ scale: isLoading ? 1 : 1.02 }}
+                whileTap={{ scale: isLoading ? 1 : 0.98 }}
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    {mode === 'create' ? 'Creating Game...' : 'Joining Game...'}
+                  </div>
+                ) : (
+                  mode === 'create' ? 'Create Game' : 'Join Game'
+                )}
+              </motion.button>
+            </div>
           </form>
 
           {/* Instructions */}
