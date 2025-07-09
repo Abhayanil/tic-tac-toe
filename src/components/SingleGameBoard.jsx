@@ -3,89 +3,61 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Board from './Board'
 import ThemeToggle from './ThemeToggle'
 
-const GameBoard = ({ 
+const SingleGameBoard = ({ 
   gameState, 
-  currentPlayer, 
   onMakeMove, 
+  onResetGame,
   onBack,
   darkMode,
   onToggleTheme 
 }) => {
   const [showToast, setShowToast] = useState(null)
 
-  const isMyTurn = gameState.currentTurn === currentPlayer
-  const mySymbol = currentPlayer
-  const opponentSymbol = currentPlayer === 'X' ? 'O' : 'X'
-  const myName = currentPlayer === 'X' ? gameState.playerXName : gameState.playerOName
-  const opponentName = currentPlayer === 'X' ? gameState.playerOName : gameState.playerXName
-
-  // Show toast notifications
+  // Show toast notifications for turns
   useEffect(() => {
-    if (gameState.status === 'playing') {
-      if (isMyTurn) {
-        setShowToast({ type: 'turn', message: "It's your turn!" })
-      } else {
-        setShowToast({ type: 'waiting', message: `Waiting for ${opponentName}...` })
-      }
+    if (gameState.status === 'playing' && !gameState.winner) {
+      const currentPlayerName = gameState.currentTurn === 'X' ? gameState.playerXName : gameState.playerOName
+      setShowToast({ 
+        type: 'turn', 
+        message: `It's ${currentPlayerName}'s turn!` 
+      })
       
-      const timer = setTimeout(() => setShowToast(null), 3000)
+      const timer = setTimeout(() => setShowToast(null), 2000)
       return () => clearTimeout(timer)
     }
-  }, [gameState.currentTurn, gameState.status, isMyTurn, opponentName])
+  }, [gameState.currentTurn, gameState.status, gameState.playerXName, gameState.playerOName, gameState.winner])
 
   // Show winner toast
   useEffect(() => {
     if (gameState.winner) {
-      const isWinner = gameState.winner === currentPlayer
+      const winnerName = gameState.winner === 'X' ? gameState.playerXName : gameState.playerOName
       setShowToast({
-        type: isWinner ? 'win' : 'lose',
-        message: isWinner ? 'You won! 🎉' : `${opponentName} won! 😔`
+        type: 'win',
+        message: `${winnerName} won! 🎉`
       })
     }
-  }, [gameState.winner, currentPlayer, opponentName])
+  }, [gameState.winner, gameState.playerXName, gameState.playerOName])
 
   const handleSquareClick = (index) => {
-    console.log('GameBoard handleSquareClick:', {
-      index,
-      isMyTurn,
-      boardValue: gameState.board[index],
-      winner: gameState.winner,
-      currentTurn: gameState.currentTurn,
-      currentPlayer,
-      gameStatus: gameState.status
-    });
-    
-    if (!isMyTurn || gameState.board[index] || gameState.winner) {
-      console.log('Move blocked:', {
-        notMyTurn: !isMyTurn,
-        squareOccupied: !!gameState.board[index],
-        gameFinished: !!gameState.winner
-      });
+    if (gameState.board[index] || gameState.winner) {
       return;
     }
     
-    console.log('Making move at index:', index);
     onMakeMove(index);
   }
 
   const getStatusMessage = () => {
     if (gameState.winner) {
-      if (gameState.winner === currentPlayer) {
-        return "🎉 You Won!"
-      } else {
-        return `😔 ${opponentName} Won!`
-      }
+      const winnerName = gameState.winner === 'X' ? gameState.playerXName : gameState.playerOName
+      return `🎉 ${winnerName} Won!`
     }
     
     if (gameState.board.every(cell => cell !== null)) {
       return "🤝 It's a Draw!"
     }
 
-    if (isMyTurn) {
-      return "Your Turn"
-    } else {
-      return `${opponentName}'s Turn`
-    }
+    const currentPlayerName = gameState.currentTurn === 'X' ? gameState.playerXName : gameState.playerOName
+    return `${currentPlayerName}'s Turn`
   }
 
   const containerVariants = {
@@ -125,18 +97,18 @@ const GameBoard = ({
           className="flex justify-between items-center mb-6 bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-200 dark:border-gray-700"
         >
           <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">You</p>
-            <p className={`font-bold text-lg ${mySymbol === 'X' ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'}`}>
-              {myName} ({mySymbol})
+            <p className="text-sm text-gray-600 dark:text-gray-400">Player X</p>
+            <p className="font-bold text-lg text-blue-600 dark:text-blue-400">
+              {gameState.playerXName}
             </p>
           </div>
           <div className="text-center">
             <p className="text-xs text-gray-500 dark:text-gray-500">VS</p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Opponent</p>
-            <p className={`font-bold text-lg ${opponentSymbol === 'X' ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'}`}>
-              {opponentName} ({opponentSymbol})
+            <p className="text-sm text-gray-600 dark:text-gray-400">Player O</p>
+            <p className="font-bold text-lg text-red-600 dark:text-red-400">
+              {gameState.playerOName}
             </p>
           </div>
         </motion.div>
@@ -150,8 +122,8 @@ const GameBoard = ({
             {getStatusMessage()}
           </div>
           {!gameState.winner && (
-            <div className={`turn-indicator ${isMyTurn ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
-              {isMyTurn ? '🟢 Your move' : '🟡 Waiting...'}
+            <div className={`turn-indicator ${gameState.currentTurn === 'X' ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'}`}>
+              {gameState.currentTurn === 'X' ? '🔵 X to move' : '🔴 O to move'}
             </div>
           )}
         </motion.div>
@@ -163,7 +135,7 @@ const GameBoard = ({
             onSquareClick={handleSquareClick}
             winningLine={gameState.winningLine || []}
             winner={gameState.winner}
-            isDisabled={!isMyTurn}
+            isDisabled={false}
           />
         </motion.div>
 
@@ -176,27 +148,15 @@ const GameBoard = ({
             onClick={onBack}
             className="flex-1 py-3 px-4 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors"
           >
-            Leave Game
+            Back to Menu
           </button>
           
-          {gameState.winner && (
-            <button
-              onClick={() => window.location.reload()}
-              className="flex-1 py-3 px-4 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold rounded-lg shadow-lg transition-all duration-200"
-            >
-              New Game
-            </button>
-          )}
-        </motion.div>
-
-        {/* Game Info */}
-        <motion.div
-          variants={itemVariants}
-          className="mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center"
-        >
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Game ID: <span className="font-mono font-bold text-gray-900 dark:text-white">{gameState.gameId}</span>
-          </p>
+          <button
+            onClick={onResetGame}
+            className="flex-1 py-3 px-4 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold rounded-lg shadow-lg transition-all duration-200"
+          >
+            New Game
+          </button>
         </motion.div>
       </motion.div>
 
@@ -210,8 +170,6 @@ const GameBoard = ({
             className={`fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg z-50 ${
               showToast.type === 'turn' 
                 ? 'bg-green-500 text-white' 
-                : showToast.type === 'waiting'
-                ? 'bg-orange-500 text-white'
                 : showToast.type === 'win'
                 ? 'bg-green-600 text-white'
                 : 'bg-red-500 text-white'
@@ -224,7 +182,7 @@ const GameBoard = ({
 
       {/* Confetti animation for winner */}
       <AnimatePresence>
-        {gameState.winner === currentPlayer && (
+        {gameState.winner && (
           <motion.div
             className="fixed inset-0 pointer-events-none z-40"
             initial={{ opacity: 0 }}
@@ -259,4 +217,4 @@ const GameBoard = ({
   )
 }
 
-export default GameBoard
+export default SingleGameBoard
