@@ -45,8 +45,27 @@ const GameBoard = ({
   }, [gameState.winner, currentPlayer, opponentName])
 
   const handleSquareClick = (index) => {
-    if (!isMyTurn || gameState.board[index] || gameState.winner) return
-    onMakeMove(index)
+    console.log('GameBoard handleSquareClick:', {
+      index,
+      isMyTurn,
+      boardValue: gameState.board[index],
+      winner: gameState.winner,
+      currentTurn: gameState.currentTurn,
+      currentPlayer,
+      gameStatus: gameState.status
+    });
+    
+    if (!isMyTurn || gameState.board[index] || gameState.winner) {
+      console.log('Move blocked:', {
+        notMyTurn: !isMyTurn,
+        squareOccupied: !!gameState.board[index],
+        gameFinished: !!gameState.winner
+      });
+      return;
+    }
+    
+    console.log('Making move at index:', index);
+    onMakeMove(index);
   }
 
   const getStatusMessage = () => {

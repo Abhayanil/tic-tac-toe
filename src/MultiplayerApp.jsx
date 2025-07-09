@@ -83,11 +83,34 @@ const MultiplayerApp = () => {
         if (gameIdFromUrl) {
           loadGame(gameIdFromUrl);
         }
-      }, 3000); // Check every 3 seconds
+      }, 2000); // Check every 2 seconds
 
       return () => clearInterval(interval);
     }
   }, [gameFlow, currentPlayerState, gameState.status, gameIdFromUrl, loadGame]);
+
+  // Enhanced effect to handle game state transitions more reliably
+  useEffect(() => {
+    console.log('Game state changed:', {
+      status: gameState.status,
+      currentPlayerState,
+      gameFlow,
+      playerXName: gameState.playerXName,
+      playerOName: gameState.playerOName
+    });
+
+    // If we're player X and game status changed to playing, transition to game board
+    if (currentPlayerState === 'X' && gameState.status === 'playing' && gameFlow === 'waiting') {
+      console.log('Player X transitioning to game board');
+      setGameFlow('playing');
+    }
+
+    // If we're player O and successfully joined, we should already be in playing state
+    if (currentPlayerState === 'O' && gameState.status === 'playing' && gameFlow !== 'playing') {
+      console.log('Player O transitioning to game board');
+      setGameFlow('playing');
+    }
+  }, [gameState.status, currentPlayerState, gameFlow, gameState.playerXName, gameState.playerOName]);
 
   const handleCreateGame = async (name) => {
     setPlayerName(name)

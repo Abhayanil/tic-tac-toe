@@ -98,6 +98,8 @@ const Square = ({ value, onClick, isWinning, isDisabled, isDisappearing, index }
     e.preventDefault()
     e.stopPropagation()
     
+    console.log('Square clicked:', { index, isDisabled, value, hasValue: !!value });
+    
     if (!isDisabled && !value) {
       playClickSound()
       onClick()
@@ -108,6 +110,19 @@ const Square = ({ value, onClick, isWinning, isDisabled, isDisappearing, index }
     // Prevent default touch behavior that might interfere
     e.preventDefault()
     e.stopPropagation()
+  }
+
+  const handleTouchEnd = (e) => {
+    // Handle touch end for better mobile experience
+    e.preventDefault()
+    e.stopPropagation()
+    
+    console.log('Square touch end:', { index, isDisabled, value, hasValue: !!value });
+    
+    if (!isDisabled && !value) {
+      playClickSound()
+      onClick()
+    }
   }
 
   return (
@@ -125,6 +140,7 @@ const Square = ({ value, onClick, isWinning, isDisabled, isDisappearing, index }
       whileTap={!isDisabled ? "tap" : {}}
       onClick={handleClick}
       onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       disabled={isDisabled}
       // Add touch-action CSS property for better mobile handling
       style={{ touchAction: 'manipulation' }}

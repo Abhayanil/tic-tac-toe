@@ -161,11 +161,28 @@ export const useGameState = (gameId = null) => {
       let newOQueue = [...oQueue]
       let playerQueue = currentPlayer === 'X' ? newXQueue : newOQueue
 
-      // Enforce 3-symbol rule
+      // Enforce 3-symbol rule, but don't remove if it would break a winning line
       if (playerQueue.length === 3) {
-        const oldestIdx = playerQueue.shift()
-        newBoard[oldestIdx] = null
+        const oldestIdx = playerQueue[0]
+        
+        // Create a temporary board to test if removing the oldest symbol breaks a winning line
+        const tempBoard = [...newBoard]
+        tempBoard[oldestIdx] = null
+        tempBoard[index] = currentPlayer
+        
+        const tempResult = checkWinner(tempBoard)
+        
+        // Only remove the oldest symbol if it doesn't break a winning line for the current player
+        if (!tempResult || tempResult.winner !== currentPlayer) {
+          playerQueue.shift()
+          newBoard[oldestIdx] = null
+        } else {
+          // If removing would break a winning line, don't allow the move
+          console.log('Move blocked: would break winning line')
+          return false
+        }
       }
+      
       playerQueue.push(index)
       newBoard[index] = currentPlayer
 
@@ -176,12 +193,12 @@ export const useGameState = (gameId = null) => {
         newOQueue = playerQueue
       }
 
-      // Check for winner
+      // Check for winner after the move
       const result = checkWinner(newBoard)
       const nextTurn = currentPlayer === 'X' ? 'O' : 'X'
       const newStatus = result ? 'finished' : 'playing'
 
-      // Save queues in Supabase (optional: if you want to sync them)
+      // Save to Supabase
       const { data, error } = await supabase
         .from('games')
         .update({
@@ -419,12 +436,52 @@ export const useGameState = (gameId = null) => {
 
     subscriptionRef.current = channel;
 
+    // Also set up a fallback polling mechanism for mobile devices
+    const pollInterval = setInterval(async () => {
+      try {
+        const { data, error } = await supabase
+          .from('games')
+          .select('*')
+          .eq('game_id', gameId)
+          .single();
+
+        if (!error && data) {
+          setGameState(prev => {
+            // Only update if the data has actually changed
+            if (JSON.stringify(prev.board) !== JSON.stringify(data.board) ||
+                prev.status !== data.status ||
+                prev.currentTurn !== data.current_turn ||
+                prev.winner !== data.winner) {
+              console.log('Polling update:', data);
+              return {
+                ...prev,
+                ...data,
+                gameId: data.game_id,
+                playerXName: data.player_x_name,
+                playerOName: data.player_o_name || '',
+                board: data.board,
+                currentTurn: data.current_turn,
+                winner: data.winner,
+                winningLine: data.winning_line || [],
+                status: data.status,
+                isLoading: false,
+              };
+            }
+            return prev;
+          });
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+    }, 3000); // Poll every 3 seconds as fallback
+
     // Cleanup on unmount or gameId change
     return () => {
       if (subscriptionRef.current) {
         supabase.removeChannel(subscriptionRef.current);
         subscriptionRef.current = null;
       }
+      clearInterval(pollInterval);
     };
   }, [gameId]);
 
