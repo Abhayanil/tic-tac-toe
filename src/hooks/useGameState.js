@@ -14,13 +14,13 @@ export const useGameState = (gameId = null) => {
     winningLine: [],
     status: 'waiting', // 'waiting', 'playing', 'finished'
     isLoading: false,
-    error: null
+    error: null,
+    xQueue: [], // Store queue in game state for synchronization
+    oQueue: [] // Store queue in game state for synchronization
   })
 
   const [currentPlayer, setCurrentPlayer] = useState(null) // 'X' or 'O'
   const subscriptionRef = useRef(null)
-  const [xQueue, setXQueue] = useState([]) // indices of X's moves in order
-  const [oQueue, setOQueue] = useState([]) // indices of O's moves in order
   const [startingPlayer, setStartingPlayer] = useState('X') // alternates after each game
 
   // Generate a short game ID
@@ -58,7 +58,9 @@ export const useGameState = (gameId = null) => {
           player_x_name: playerName,
           board: Array(9).fill(null),
           current_turn: 'X',
-          status: 'waiting'
+          status: 'waiting',
+          x_queue: [],
+          o_queue: []
         })
         .select()
         .single()
@@ -76,6 +78,8 @@ export const useGameState = (gameId = null) => {
         winner: data.winner,
         winningLine: data.winning_line || [],
         status: data.status,
+        xQueue: data.x_queue || [],
+        oQueue: data.o_queue || [],
         isLoading: false
       }))
       
@@ -133,6 +137,8 @@ export const useGameState = (gameId = null) => {
         winner: data.winner,
         winningLine: data.winning_line || [],
         status: data.status,
+        xQueue: data.x_queue || [],
+        oQueue: data.o_queue || [],
         isLoading: false
       }))
       
@@ -157,32 +163,17 @@ export const useGameState = (gameId = null) => {
 
     try {
       let newBoard = [...gameState.board]
-      let newXQueue = [...xQueue]
-      let newOQueue = [...oQueue]
+      let newXQueue = [...(gameState.xQueue || [])]
+      let newOQueue = [...(gameState.oQueue || [])]
       let playerQueue = currentPlayer === 'X' ? newXQueue : newOQueue
 
-      // Enforce 3-symbol rule, but don't remove if it would break a winning line
-      if (playerQueue.length === 3) {
-        const oldestIdx = playerQueue[0]
-        
-        // Create a temporary board to test if removing the oldest symbol breaks a winning line
-        const tempBoard = [...newBoard]
-        tempBoard[oldestIdx] = null
-        tempBoard[index] = currentPlayer
-        
-        const tempResult = checkWinner(tempBoard)
-        
-        // Only remove the oldest symbol if it doesn't break a winning line for the current player
-        if (!tempResult || tempResult.winner !== currentPlayer) {
-          playerQueue.shift()
-          newBoard[oldestIdx] = null
-        } else {
-          // If removing would break a winning line, don't allow the move
-          console.log('Move blocked: would break winning line')
-          return false
-        }
+      // Enforce 3-symbol rule - remove oldest symbol when player has 3 symbols
+      if (playerQueue.length >= 3) {
+        const oldestIdx = playerQueue.shift() // Remove the oldest move
+        newBoard[oldestIdx] = null // Clear the oldest symbol from board
       }
       
+      // Add the new move
       playerQueue.push(index)
       newBoard[index] = currentPlayer
 
@@ -198,7 +189,7 @@ export const useGameState = (gameId = null) => {
       const nextTurn = currentPlayer === 'X' ? 'O' : 'X'
       const newStatus = result ? 'finished' : 'playing'
 
-      // Save to Supabase
+      // Save to Supabase with updated queues
       const { data, error } = await supabase
         .from('games')
         .update({
@@ -207,6 +198,8 @@ export const useGameState = (gameId = null) => {
           winner: result?.winner || null,
           winning_line: result?.line || null,
           status: newStatus,
+          x_queue: newXQueue,
+          o_queue: newOQueue,
           updated_at: new Date().toISOString(),
         })
         .eq('game_id', gameState.gameId)
@@ -214,10 +207,6 @@ export const useGameState = (gameId = null) => {
         .single()
 
       if (error) throw error
-
-      // Update local queues
-      setXQueue(newXQueue)
-      setOQueue(newOQueue)
 
       return true
     } catch (error) {
@@ -232,8 +221,6 @@ export const useGameState = (gameId = null) => {
     if (!gameState.gameId) return
     const nextStarter = startingPlayer === 'X' ? 'O' : 'X'
     setStartingPlayer(nextStarter)
-    setXQueue([])
-    setOQueue([])
     try {
       const { data, error } = await supabase
         .from('games')
@@ -243,6 +230,8 @@ export const useGameState = (gameId = null) => {
           winner: null,
           winning_line: null,
           status: 'playing',
+          x_queue: [],
+          o_queue: [],
           updated_at: new Date().toISOString(),
         })
         .eq('game_id', gameState.gameId)
@@ -257,6 +246,8 @@ export const useGameState = (gameId = null) => {
         winner: data.winner,
         winningLine: data.winning_line || [],
         status: data.status,
+        xQueue: data.x_queue || [],
+        oQueue: data.o_queue || [],
         isLoading: false
       }))
     } catch (error) {
@@ -296,6 +287,8 @@ export const useGameState = (gameId = null) => {
               winner: data.winner,
               winningLine: data.winning_line || [],
               status: data.status,
+              xQueue: data.x_queue || [],
+              oQueue: data.o_queue || [],
               isLoading: false,
             }))
           }
@@ -345,6 +338,8 @@ export const useGameState = (gameId = null) => {
         winner: data.winner,
         winningLine: data.winning_line || [],
         status: data.status,
+        xQueue: data.x_queue || [],
+        oQueue: data.o_queue || [],
         isLoading: false
       }))
 
@@ -415,6 +410,8 @@ export const useGameState = (gameId = null) => {
               winner: data.winner,
               winningLine: data.winning_line || [],
               status: data.status,
+              xQueue: data.x_queue || [],
+              oQueue: data.o_queue || [],
               isLoading: false,
             }));
           }
